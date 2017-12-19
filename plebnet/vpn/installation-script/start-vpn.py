@@ -17,12 +17,6 @@ temp = ddir.split("/")
 del temp[-1]
 unzdir = '/'.join(temp)
 
-logging.basicConfig(filename='test.log',level=logging.DEBUG)
-logging.debug("*********** Downloaded file location *************\n\n" + ddir + "\n")
-
-logging.debug("*********** Extracted file to *************\n\n" + confdir +  "\n server loc: " + current)
-
-
 cm2 = 'unzip -o ' + ddir + ' -d ' + unzdir
 
 
@@ -53,6 +47,3 @@ logging.debug("******************************************************")
 
 logging.debug('output1: ' + output1)
 logging.debug('output2: ' + output2)
-
-#y = os.popen('mkdir test').read()
-#os.system("echo 'whhut" + str(x) + y + " -   ---- -----'")
