@@ -8,14 +8,14 @@ now = datetime.datetime.now()
 toCompare = ""
 s_status = ""
 
-fpath = '~/Desktop/textfile.txt'
+fpath = os.path.dirname(os.path.realpath(__file__)) + '/iptextfile.txt'
 
 print(len(sys.argv))
 
 if len(sys.argv) == int(2):
     fpath = sys.argv[1]
-    print("sdfsdfsdf: " + fpath)
-print(fpath)
+    print("custom path: " + fpath)
+print("statndar path" + fpath)
 
 if os.path.isfile(fpath):
     file = open(fpath,'r')
@@ -28,7 +28,7 @@ currentIP = os.popen('curl https://am.i.mullvad.net').read()
 
 if toCompare == "":
     s_status = s_status + "\nintitial file containing ip not in " + fpath + "\n"
-elif currentIP == toCompare:
+elif currentIP != toCompare:
     s_status = s_status + "\nvpn on\n"
 else:
     s_status = s_status + "\nvpn off\n"
