@@ -12,6 +12,11 @@ if len(sys.argv) != int(3):
 c_pwd = os.path.dirname(os.path.realpath(__file__))
 tempfile = c_pwd + '/iptextfile.txt'
 
+c_logdir = c_pwd + '/log'
+
+if os.path.isfile(c_logdir) == False:
+    os.popen('mkdir ' + c_logdir).read()
+
 if os.path.isfile(tempfile) == False:
     os.popen('touch ' + tempfile).read()
     file = open(tempfile,'w')
@@ -37,7 +42,8 @@ time.sleep(5)
 
 test2 = os.popen("curl https://am.i.mullvad.net").read()
 
-logging.basicConfig(filename='teststart.log',level=logging.DEBUG)
+c_logfile = c_logdir + '/teststart.log'
+logging.basicConfig(filename=c_logfile,level=logging.DEBUG)
 logging.debug("************** Script started ************\n")
 logging.debug("************** TEST ! ************\n -: " + test)
 logging.debug("************** Compare IPs ************\n -: " + test1 + "-:" + test2)

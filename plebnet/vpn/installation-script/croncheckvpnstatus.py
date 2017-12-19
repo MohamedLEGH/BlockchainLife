@@ -10,6 +10,11 @@ s_status = ""
 
 fpath = os.path.dirname(os.path.realpath(__file__)) + '/iptextfile.txt'
 
+c_logdir = os.path.dirname(os.path.realpath(__file__)) + '/log'
+
+if os.path.isfile(c_logdir) == False:
+    os.popen('mkdir ' + c_logdir).read()
+
 print(len(sys.argv))
 
 if len(sys.argv) == int(2):
@@ -36,6 +41,7 @@ else:
 
 logstatus = "\n_________________________________________\n\n -----" + now.strftime("%Y-%m-%d %H:%M") +  " -----\n\n" + s_status + "\n_______________________________________\n"
 
-logging.basicConfig(filename='vpnStatus.log',level=logging.DEBUG)
+c_logfile = c_logdir + '/vpnStatus.log'
+logging.basicConfig(filename=c_logfile,level=logging.DEBUG)
 logging.debug("************** Vpn status check on " + now.strftime("%Y-%m-%d %H:%M") + " ************\n" + logstatus)
 logging.debug("*****************************************")

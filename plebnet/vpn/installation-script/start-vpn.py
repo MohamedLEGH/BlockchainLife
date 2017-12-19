@@ -17,6 +17,19 @@ temp = ddir.split("/")
 del temp[-1]
 unzdir = '/'.join(temp)
 
+c_logdir = os.path.dirname(os.path.realpath(__file__)) + '/log'
+
+if os.path.isfile(c_logdir) == False:
+    os.popen('mkdir ' + c_logdir).read()
+
+c_logfile = c_logdir + '/test.log'
+
+logging.basicConfig(filename=c_logfile,level=logging.DEBUG)
+logging.debug("*********** Downloaded file location *************\n\n" + ddir + "\n")
+
+logging.debug("*********** Extracted file to *************\n\n" + confdir +  "\n server loc: " + current)
+
+
 cm2 = 'unzip -o ' + ddir + ' -d ' + unzdir
 
 
@@ -29,7 +42,7 @@ output2 = os.popen(cmmnd2).read()
 
 test2 = os.popen("curl https://am.i.mullvad.net").read()
 
-logging.basicConfig(filename='test.log',level=logging.DEBUG)
+logging.basicConfig(filename=c_logfile,level=logging.DEBUG)
 logging.debug("*********** Downloaded file location *************\n\n" + ddir + "\n")
 
 logging.debug("*********** Extracted file to *************\n\n" + confdir +  "\n")
@@ -47,3 +60,6 @@ logging.debug("******************************************************")
 
 logging.debug('output1: ' + output1)
 logging.debug('output2: ' + output2)
+
+#y = os.popen('mkdir test').read()
+#os.system("echo 'whhut" + str(x) + y + " -   ---- -----'")
