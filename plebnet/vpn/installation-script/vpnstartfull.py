@@ -12,8 +12,8 @@ sc_dir = sys.argv[1]
 dd_dir = sys.argv[2]
 ss_loc = sys.argv[3]
 
-cm1 = 'apt-get install openvpn'
-cm2 = 'apt-get install unzip'
+cm1 = 'apt-get install -y openvpn'
+cm2 = 'apt-get install -y unzip'
 
 test = os.popen(cm1).read()
 test_ = os.popen(cm2).read()
