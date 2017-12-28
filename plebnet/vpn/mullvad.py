@@ -1,6 +1,8 @@
 from robobrowser import RoboBrowser
 #from cloudomate.wallet import Wallet
 import os
+import zipfile
+import shutil
 
 class MullVad:
 	accountnumber = "6798499523758101"
@@ -68,12 +70,47 @@ class MullVad:
 		print("Time to setup the vpn!")
 		#TODO: Setup VPN using openVPN and mullvad settings
 
+	#Download config files for setting up VPN and extract them
+	def downloadFiles(self):
+		#Fill information on website to get right config files for openvpn 
+		self.br.open("https://mullvad.net/en/download/config/")
+		form = self.br.get_form()
+		form['account_token'].value = self.accountnumber
+		form['platform'].value = "Linux"
+		form['region'].value = "se-sto"
+		form['port'].value = "0"
+		self.br.session.headers['Referer'] = self.br.url
+		self.br.submit_form(form)
+		content = self.br.response.content
+
+		#Download the zip file to the right location
+		files_path = "./installation-script/config.zip"
+		with open(files_path, "wb") as output:
+		  output.write(content)
+
+		#Unzip files
+		zip_file = zipfile.ZipFile(files_path, 'r')
+		for member in zip_file.namelist():
+			filename = os.path.basename(member)
+			# skip directories
+			if not filename:
+				continue
+
+		    # copy file (taken from zipfile's extract)
+			source = zip_file.open(member)
+			target = file(os.path.join("./installation-script/", filename), "wb")
+			with source, target:
+				shutil.copyfileobj(source, target)
+
+		#Delete zip file
+		os.remove(files_path)
 
 
 if __name__ == '__main__':
 	mv = MullVad()
 	test_scraping = False
-	test_payment = True
+	test_payment = False
+	test_downloading = True
 	if test_scraping:
 		mv.login()
 		#TODO: Add check if VPN is still valid before purchase
@@ -84,3 +121,5 @@ if __name__ == '__main__':
 			print("Transaction failed")
 	if test_payment:
 		mv.pay(0.00027, "mfXuna4dtqrKW827BpWjzqkKDyqUjuzPz5")
+	if test_downloading:
+		mv.downloadFiles()
