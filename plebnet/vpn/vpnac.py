@@ -1,11 +1,26 @@
 from robobrowser import RoboBrowser
-
+import random
+import requests
 
 class vpnac:
-    br = RoboBrowser(parser='html.parser', history=True)
+    UAS = ("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1",
+           "Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0",
+           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10; rv:33.0) Gecko/20100101 Firefox/33.0",
+           "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36",
+           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.1 Safari/537.36",
+           "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.0 Safari/537.36",
+           )
+
+    ua = UAS[random.randrange(len(UAS))]
+    br = RoboBrowser(parser='html.parser', history=True, user_agent=ua)
     links = []
-    email = "chicker@tudelft.nl"
+    email = "chicker11@tudelft.nl"
     password = "hoihoihoi"
+
+    def __init__(self):
+
+
+        print("This is the constructor")
 
     def hasnumbers(self, string):
         return any(char.isdigit() for char in string)
@@ -128,11 +143,13 @@ class vpnac:
         coinpaymentsforms = self.br.get_forms()
         print('forms length:' + str(len(coinpaymentsforms)))
         coinpaymentsform['selcoin'].value = 'ETH'
+        #coinpaymentsform['csrf'].value = self.randomcsrf()
         coinpaymentsform['first_name'].value = 'private'
         coinpaymentsform['last_name'].value = 'user'
         coinpaymentsform['checkout'].value = '1'
         coinpaymentsform['email'].value = self.email
         print(coinpaymentsform)
+        print(coinpaymentsform.parsed)
 
         self.br.submit_form(coinpaymentsform)
 
@@ -140,18 +157,15 @@ class vpnac:
         lastpage = str(self.br.parsed)
         print(lastpage)
 
-    def test(self):
-        website = "http://www.ka-wing.nl/scrape"
-        a = self.br.open(website)
-        page = str(self.br.parsed)
-        form = self.br.get_forms();
-        field = self.br
+    def randomcsrf(self):
+        possibilties = "0123456789abcdef"
+        csrfexample = "d4333f2fd5b34a3257e13dbf64944d54a4c94b2594c48f7da4597f0e6b5fb181"
+        csrf = ""
 
-        all = self.br.find_all({'input' : True})
+        for i in range(0, len(csrfexample)):
+            csrf += possibilties[random.randrange(len(possibilties))]
 
-        print("\n\n\n")
-
-        print(all)
+        return csrf
 
 
 
