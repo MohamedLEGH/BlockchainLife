@@ -3,12 +3,21 @@ from robobrowser import RoboBrowser
 import os
 import zipfile
 import shutil
+import urllib.request
 
 class MullVad:
 	accountnumber = "6798499523758101"
 	website = "https://www.mullvad.net/account/login/"
 	br = RoboBrowser(parser='html.parser', history=True)
 	#wallet = Wallet()
+
+	#create account
+	def createAccount(self):
+		#Retrieve captcha for creating account and save it
+		self.br.open("https://www.mullvad.net/en/account/create/")
+		img = self.br.find("img", class_= "captcha")['src']
+		urllib.request.urlretrieve("https://www.mullvad.net"+img,"captcha.png")
+
 	
 	#Login with given accountnumber
 	def login(self):
@@ -110,7 +119,8 @@ if __name__ == '__main__':
 	mv = MullVad()
 	test_scraping = False
 	test_payment = False
-	test_downloading = True
+	test_downloading = False
+	test_createAccount = True
 	if test_scraping:
 		mv.login()
 		#TODO: Add check if VPN is still valid before purchase
@@ -123,3 +133,5 @@ if __name__ == '__main__':
 		mv.pay(0.00027, "mfXuna4dtqrKW827BpWjzqkKDyqUjuzPz5")
 	if test_downloading:
 		mv.downloadFiles()
+	if test_createAccount:
+		mv.createAccount()
