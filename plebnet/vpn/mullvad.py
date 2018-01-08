@@ -4,6 +4,7 @@ import os
 import zipfile
 import shutil
 import urllib.request
+import sys
 
 class MullVad:
 	accountnumber = "6798499523758101"
@@ -17,6 +18,7 @@ class MullVad:
 		self.br.open("https://www.mullvad.net/en/account/create/")
 		img = self.br.find("img", class_= "captcha")['src']
 		urllib.request.urlretrieve("https://www.mullvad.net"+img,"captcha.png")
+		#TODO: Use captcha solution for getting new accountnr and store that somewhere
 
 	
 	#Login with given accountnumber
@@ -26,6 +28,19 @@ class MullVad:
 		form['account_number'].value = self.accountnumber
 		self.br.session.headers['Referer'] = self.website
 		self.br.submit_form(form)
+
+	#checks if vpn expired, should be called after login
+	def checkVPN(self):
+		self.login()
+		expire_date = self.br.select(".balance-header")[0].text
+		expire_date = expire_date.split('\n')[2]
+		temp1 = expire_date.index('in')
+		temp2 = expire_date.index('days')
+		expire_date = expire_date[temp1+3:temp2-1]
+		#print(expire_date)
+		if (expire_date <= '0'):
+			print("Trying to puchase")
+			self.purchase()
 
 	#Purchase 1 month VPN
 	def purchase(self):
@@ -45,10 +60,10 @@ class MullVad:
 				bitcoin_address = bitcoin_address_line.partition('"')[-1].rpartition('"')[0]
 		print(month_price)
 		print(bitcoin_address)
-		#if pay(month_price, bitcoin_address):
-		#	setupVPN()
-		#else:
-		#	print("Error: payment failed")
+		if pay(month_price, bitcoin_address):
+			self.setupVPN()
+		else:
+			print("Error: payment failed")
 
 	#Pay for 1 month using bitcoins and the electrum wallet
 	def pay(self, price, bitcoin_address):
@@ -77,6 +92,7 @@ class MullVad:
 	#Setup the VPN
 	def setupVPN():
 		print("Time to setup the vpn!")
+		self.downloadFiles()
 		#TODO: Setup VPN using openVPN and mullvad settings
 
 	#Download config files for setting up VPN and extract them
@@ -120,7 +136,7 @@ if __name__ == '__main__':
 	test_scraping = False
 	test_payment = False
 	test_downloading = False
-	test_createAccount = True
+	test_createAccount = False
 	if test_scraping:
 		mv.login()
 		#TODO: Add check if VPN is still valid before purchase
@@ -135,3 +151,6 @@ if __name__ == '__main__':
 		mv.downloadFiles()
 	if test_createAccount:
 		mv.createAccount()
+	#check if vpn is expired	
+	if sys.argv[1] == "check":
+		mv.checkVPN();
