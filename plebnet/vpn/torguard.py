@@ -1,6 +1,6 @@
 from robobrowser import RoboBrowser
 import random
-from . import config
+from plebnet.vpn import config
 import sys
 
 class torguard:
