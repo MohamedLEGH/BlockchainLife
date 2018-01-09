@@ -14,8 +14,13 @@ class airvpn:
     def __init__(self):
         print("This is the constructor")
 
-    def login(self):
-        websitelogin = "https://airvpn.org/index.php?app=core&module=global&section=login"
+    def login(self, link=None):
+        if link is None:
+            websitelogin = "https://airvpn.org/index.php?app=core&module=global&section=login"
+        else:
+            websitelogin = link
+
+        print("link: " + str(link))
         self.br.open(websitelogin)
         page = str(self.br.parsed)
 
@@ -26,30 +31,45 @@ class airvpn:
         self.br.submit_form(form)
 
     def purchase(self):
-        self.login()
+        #self.login()
         websitevpnac = "https://airvpn.org/plans/"
-        self.br.session.headers['Referer'] = self.br.url
+
         a = self.br.open(websitevpnac)
+        self.br.session.headers['Referer'] = self.br.url
 
         #Finds the form for the plan.
         form = self.br.get_form(id="buy")
         form["plan"].value = "1m"
         self.br.submit_form(form)
 
+        #https://airvpn.org/?app=nexus&module=payments&section=pay&id=701212
+
         #Gets the redirection link
         b = str(self.br.find_all(class_="message_info"))
         explode = b.split('"')
-        link = "https://www.airvpn.org" + explode[3]
-        print(link)
-        #link = self.br.get_link(text=re.compile("here"))
-        #self.br.follow_link(link)
+        link = "https://airvpn.org" + explode[3]
+        link = link.replace("amp;", "")
+        link = link.replace("§", "&sect")
+        print("It goes to this link: " + link)
 
-        #Accessing the link result in a 404.
         self.br.open(link)
         page = str(self.br.parsed)
-        print(page)
+        #page = str(self.br.parsed)
+        #print(page)
 
+        login_link = str(self.br.get_link(text=re.compile("If you already have an account, click here to login"))).split('"')[1]
 
+        print("Hier: " + login_link)
+
+        login_link = login_link.replace("amp;", "")
+
+        self.login(link=login_link)
+
+        page = str(self.br.parsed)
+        #print(page)
+
+        self.br.get_form(action="https://airvpn.org/index.php?app=nexus&module=payments&section=receive&do=validate")
+        print(form)
 
 if __name__ == '__main__':
     a = airvpn()
