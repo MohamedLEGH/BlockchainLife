@@ -31,8 +31,8 @@ class airvpn:
 
     def purchase(self, currency="ETH", plan="1m"):
         #Opens the page for the plans.
-        websitevpnac = "https://airvpn.org/plans/"
-        a = self.br.open(websitevpnac)
+        website_airvpn = "https://airvpn.org/plans/"
+        a = self.br.open(website_airvpn)
         self.br.session.headers['Referer'] = self.br.url
 
         #Finds the form for the plan.
