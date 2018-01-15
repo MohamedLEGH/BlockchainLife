@@ -5,11 +5,13 @@ import zipfile
 import shutil
 import urllib.request
 import sys
+from captchaSolver import captchaSolver
 
 class MullVad:
 	accountnumber = "6798499523758101"
 	website = "https://www.mullvad.net/account/login/"
 	br = RoboBrowser(parser='html.parser', history=True)
+	captcha_account = "fd58e13e22604e820052b44611d61d6c"
 	#wallet = Wallet()
 
 	#create account
@@ -18,8 +20,22 @@ class MullVad:
 		self.br.open("https://www.mullvad.net/en/account/create/")
 		img = self.br.find("img", class_= "captcha")['src']
 		urllib.request.urlretrieve("https://www.mullvad.net"+img,"captcha.png")
-		#TODO: Use captcha solution for getting new accountnr and store that somewhere
-
+		c_solver = captchaSolver(captcha_account)
+		solution = c_solver.solveCaptchaTextCaseSensitive("./captcha.png")
+		form = self.br.get_form()
+		form['captcha_1'].value = solution
+		self.br.session.headers['Referer'] = self.website
+		self.br.submit_form(form)
+		#print(self.br.parsed)
+		new_accountnumber = 0
+		newpage = str(self.br.parsed)
+		for line in newpage.split("\n"):
+			if "Your account number:" in line:
+				new_accountnumber = line.split(":")[1]
+				new_accountnumber = new_accountnumber.split("<")[0].strip(" ")
+				break
+		print(new_accountnumber)
+		#TODO: Save new accountnumber to file
 	
 	#Login with given accountnumber
 	def login(self):
@@ -136,11 +152,9 @@ if __name__ == '__main__':
 	test_scraping = False
 	test_payment = False
 	test_downloading = False
-	test_createAccount = False
+	test_createAccount = True
 	if test_scraping:
 		mv.login()
-		#TODO: Add check if VPN is still valid before purchase
-		#TODO: Add check if VPN is already installed
 		if mv.purchase():
 			mv.setupVPN()
 		else:
