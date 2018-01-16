@@ -6,6 +6,8 @@ import shutil
 import urllib.request
 import sys
 from captchaSolver import captchaSolver
+from pathlib import Path
+import requests
 
 class MullVad:
 	accountnumber = "6798499523758101"
@@ -14,13 +16,17 @@ class MullVad:
 	captcha_account = "fd58e13e22604e820052b44611d61d6c"
 	#wallet = Wallet()
 
+	#set the accountnumber
+	def setAccount(self, new_accountnumber):
+		self.accountnumber = new_accountnumber
+
 	#create account
 	def createAccount(self):
 		#Retrieve captcha for creating account and save it
 		self.br.open("https://www.mullvad.net/en/account/create/")
 		img = self.br.find("img", class_= "captcha")['src']
 		urllib.request.urlretrieve("https://www.mullvad.net"+img,"captcha.png")
-		c_solver = captchaSolver(captcha_account)
+		c_solver = captchaSolver(self.captcha_account)
 		solution = c_solver.solveCaptchaTextCaseSensitive("./captcha.png")
 		form = self.br.get_form()
 		form['captcha_1'].value = solution
@@ -34,8 +40,13 @@ class MullVad:
 				new_accountnumber = line.split(":")[1]
 				new_accountnumber = new_accountnumber.split("<")[0].strip(" ")
 				break
-		print(new_accountnumber)
-		#TODO: Save new accountnumber to file
+		#print(new_accountnumber)
+		self.accountnumber = new_accountnumber
+		#Save new accountnumber to file
+		account_file_path = Path("./account.txt")
+		account_file = open(str(account_file_path),'w')
+		account_file.write(new_accountnumber)
+		account_file.close()
 	
 	#Login with given accountnumber
 	def login(self):
@@ -44,10 +55,11 @@ class MullVad:
 		form['account_number'].value = self.accountnumber
 		self.br.session.headers['Referer'] = self.website
 		self.br.submit_form(form)
+		#print(str(self.br.parsed))
 
 	#checks if vpn expired, should be called after login
-	def checkVPN(self):
-		self.login()
+	def checkVPNDate(self):
+		#self.login()
 		expire_date = self.br.select(".balance-header")[0].text
 		expire_date = expire_date.split('\n')[2]
 		temp1 = expire_date.index('in')
@@ -57,6 +69,8 @@ class MullVad:
 		if (expire_date <= '0'):
 			print("Trying to puchase")
 			self.purchase()
+		else:
+			self.checkVPN()
 
 	#Purchase 1 month VPN
 	def purchase(self):
@@ -77,7 +91,7 @@ class MullVad:
 		print(month_price)
 		print(bitcoin_address)
 		if pay(month_price, bitcoin_address):
-			self.setupVPN()
+			self.checkVPN()
 		else:
 			print("Error: payment failed")
 
@@ -105,11 +119,35 @@ class MullVad:
 			print('Insufficient balance, transaction cancelled')
 			return False
 
+	#Check if VPN is active
+	def checkVPN(self, setup=False):
+		res = requests.get("https://am.i.mullvad.net/json")
+		print(res.json())
+		#Check if ip country is Sweden
+		if res.json()['country'] == "Sweden":
+			print("VPN is active!")
+		else:
+			if setup:
+				print("Error: VPN was not installed!")
+			else:
+				self.setupVPN() 
+
 	#Setup the VPN
-	def setupVPN():
+	def setupVPN(self):
 		print("Time to setup the vpn!")
 		self.downloadFiles()
 		#TODO: Setup VPN using openVPN and mullvad settings
+		#Update and install openvpn
+		#os.popen("sudo apt-get update && apt-get upgrade")
+		test = os.popen("sudo apt-get install openvpn").read()
+		print(test)
+		#copy files to openvpn folder
+		test = os.popen("sudo cp -a ./config-files/. /etc/openvpn/").read()
+		print(test)
+		#start openvpn service
+		test = os.popen("sudo service openvpn start").read()
+		print(test)
+		self.checkVPN(True)
 
 	#Download config files for setting up VPN and extract them
 	def downloadFiles(self):
@@ -125,7 +163,7 @@ class MullVad:
 		content = self.br.response.content
 
 		#Download the zip file to the right location
-		files_path = "./installation-script/config.zip"
+		files_path = "./config-files/config.zip"
 		with open(files_path, "wb") as output:
 		  output.write(content)
 
@@ -139,7 +177,7 @@ class MullVad:
 
 		    # copy file (taken from zipfile's extract)
 			source = zip_file.open(member)
-			target = file(os.path.join("./installation-script/", filename), "wb")
+			target = open(os.path.join("./config-files/", filename), "wb")
 			with source, target:
 				shutil.copyfileobj(source, target)
 
@@ -149,10 +187,23 @@ class MullVad:
 
 if __name__ == '__main__':
 	mv = MullVad()
+	account_file_path = Path("./account.txt")
+	if account_file_path.is_file():
+		#get accountnumber
+		account_file = open(str(account_file_path),'r')
+		accountnumber = account_file.readline()
+		print(accountnumber)
+		mv.setAccount(accountnumber)
+		account_file.close()
+		mv.login()
+	else:
+		mv.createAccount()
+	mv.checkVPNDate()
+
 	test_scraping = False
 	test_payment = False
 	test_downloading = False
-	test_createAccount = True
+	test_createAccount = False
 	if test_scraping:
 		mv.login()
 		if mv.purchase():
@@ -165,6 +216,7 @@ if __name__ == '__main__':
 		mv.downloadFiles()
 	if test_createAccount:
 		mv.createAccount()
-	#check if vpn is expired	
-	if sys.argv[1] == "check":
-		mv.checkVPN();
+	#check if vpn is expired
+	if len(sys.argv) > 1:	
+		if sys.argv[1] == "check":
+			mv.checkVPNDate();
