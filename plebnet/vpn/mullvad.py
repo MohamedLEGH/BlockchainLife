@@ -8,6 +8,7 @@ import sys
 from captchaSolver import captchaSolver
 from pathlib import Path
 import requests
+import time
 
 class MullVad:
 	accountnumber = "6798499523758101"
@@ -144,9 +145,13 @@ class MullVad:
 		#copy files to openvpn folder
 		test = os.popen("sudo cp -a ./config-files/. /etc/openvpn/").read()
 		print(test)
+		os.chdir("/etc/openvpn/")
 		#start openvpn service
+		#test = os.popen("sudo nohup openvpn --config ./mullvad_se-sto.conf > /dev/null &").read()
 		test = os.popen("sudo service openvpn start").read()
 		print(test)
+		#sleep for 5 seconds, so that vpn connection can be established in the mean time
+		time.sleep(10)
 		self.checkVPN(True)
 
 	#Download config files for setting up VPN and extract them
