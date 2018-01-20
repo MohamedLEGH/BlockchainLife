@@ -3,8 +3,8 @@ airvpn_username = ""
 airvpn_password = ""
 
 #vpn.ac username and password
-airvpn_username = ""
-airvpn_password = ""
+vpnac_username = ""
+vpnac_password = ""
 
 #torguard.net
 torguard_username = ""
@@ -33,6 +33,13 @@ vpsag_ramslider = "0" # 0 - Default, +1 - +1 GB, +2 - +2 GB, +4 - +4 GB, +8 - +8
 vpsag_diskslider = "0" # 0 - Default, +20 - +20 GB, +40 - +40 GB, +80 - +80 GB, +160 - +160 GB
 vpsag_bandwidth = "1" # 1 - 3 TB, 2 - 9 TB, 3 - 15 TB, 4 - 30 TB, 5 - 60 TB
 vpsag_backup = "0" # 0 - No, 1 - Yes (1 shapshot)
+
+#nicevps.net
+nicevps_username = ""
+nicevps_password = ""
+nicevps_additionaltraffic = "112" # 112 - no additional traffic, 113 - 1 TB, 114- 2 TB, 115 - 5 TB, 116 - 10 TB, 117 - unlimited
+nicevps_iptype = "110" # 110 - shared IP, 111 - dedicated IP
+nicevps_billingcycle = "105" # 104 - 15 days, 105 - 30 days, 106 - 90 days, 107 - 180 days, 108 - 365 days, 109 - 730 days
 
 #RouterHosting
 routerhosting_username = ""
