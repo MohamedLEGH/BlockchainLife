@@ -7,6 +7,12 @@ from time import sleep
 from incapsula import IncapSession, RecaptchaBlocked
 from reCaptchaSolver import reCaptchaSolver
 
+## for regex
+import re
+## for reading emails
+import imaplib
+import email
+
 class AcVpn(VpnHoster):
 
     PAYMENT_URL = 'https://www.vpn.ac/cart.php?a=add&pid=1&billingcycle=monthly&promocode=DEC17&cc=1&skipconfig=1'
@@ -223,6 +229,21 @@ class AcVpn(VpnHoster):
 
                             break
                     break
+        mail = imaplib.IMAP4_SSL('imap.gmail.com') # for gmail, change it with your own email box provider
+        mail.login(username,password)
+        mail.list()
+        mail.select("inbox") # connect to inbox.    
+        #result, data = mail.uid('search', None, "ALL")
+        result, data = mail.uid('search', None, '(HEADER Subject "[CoinPayments.net] New Payment Submitted")') # for coinpayments
+        latest_email_uid = data[0].split()[-1]
+        result, data = mail.uid('fetch', latest_email_uid, '(RFC822)')
+        raw_email = data[0][1]
+        email_message = email.message_from_bytes(raw_email)    
+        #print(email.utils.parseaddr(email_message['From'])) # for testing          
+        #print(email_message.get_payload())
+        email_body =  email_message.get_payload()
+        amount_to_pay = re.findall("\d+\.\d+",email_body)
+        address_to_send = re.findall("0x[a-fA-F0-9]{40}",email_body)
             #print(e.response.select('div.g-recaptcha'))
             #rc_solver = reCaptchaSolver("fd58e13e22604e820052b44611d61d6c")
             #temp = rc_solver.getBalance()
