@@ -1,5 +1,12 @@
 import time
 import re
+import os
+print("start installing")
+test_ = os.popen('apt-get install -y python3-pip').read()
+test_ = os.popen('pip3 install selenium').read()
+print(test_)
+import requests
+
 from selenium import webdriver
 import sys
 
@@ -36,12 +43,28 @@ class torguard:
                                          "website might have been updated, update script."
 
     def __init__(self):
+        
+        res = requests.get('https://chromedriver.storage.googleapis.com/2.35/chromedriver_linux64.zip')
+        file_test = os.path.dirname(os.path.realpath(__file__)) + '/chromedriver_linux64.zip'
+        with open(file_test, 'wb') as output:
+            output.write(res.content)
+            pass
+        os.popen('apt-get install -y zip').read()
+        unzip_command = 'unzip -o ' + file_test + ' -d ' + os.path.dirname(os.path.realpath(__file__)) + '/'
+        os.popen('rm ' + file_test).read()
+        test_ = os.popen(unzip_command).read()
+        print(test_)
+        test_ = os.popen('apt-get install -y chromium-chromedriver').read()
+        print(test_)
+        driver_loc = os.path.dirname(os.path.realpath(__file__)) + '/chromedriver'
+        print("driver location: " + driver_loc)
+	
         # Selenium setup: headless Chrome, Window size needs to be big enough, otherwise elements will not be found.
         options = webdriver.ChromeOptions()
         options.add_argument('headless')
         options.add_argument('disable-gpu');
         options.add_argument('window-size=1920,1080');
-        self.driver = webdriver.Chrome(chrome_options=options)
+        self.driver = webdriver.Chrome(executable_path=driver_loc,chrome_options=options)
         #self.driver = webdriver.Chrome()
         self.driver.maximize_window()
 
@@ -51,10 +74,7 @@ class torguard:
         print("Placing an order.")
 
         # Puts VPN in cart and checks out.
-        self.driver.get("http://127.0.0.1")
-        #self.driver.get(self.PURCHASE_URL)
-
-        sys.exit(0)
+        self.driver.get(self.PURCHASE_URL)
 
         self.driver.find_element_by_css_selector("button[type='button'][value='Order Now']").click()
         time.sleep(1)
